@@ -30,6 +30,7 @@
 	},
 	"files": [
 		"src/",
+		"scripts/",
 		"README.md",
 		"LICENSE",
 		"CHANGELOG.md",
@@ -44,6 +45,7 @@
 		"format:check": "prettier --check .",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
+		"record:preview": "scripts/record-preview.sh",
 		"pack:check": "npm pack --dry-run"
 	},
 	"peerDependencies": {

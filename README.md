@@ -4,7 +4,13 @@ A tiny Pi extension that replaces Pi's working status with shuffled phrases, a c
 
 ## Preview
 
-When Pi is responding, the standard working line is replaced with messages like:
+When Pi is responding, the standard working line is replaced with shuffled phrases, a colorized spinner, and an ANSI shine sweep:
+
+<p>
+  <img src="docs/media/working-status.gif" alt="Animated preview of pi-working-phrase replacing Pi's working status" width="554">
+</p>
+
+Plain-text fallback:
 
 ```txt
 ⠋ Reticulating splines...
@@ -12,7 +18,7 @@ When Pi is responding, the standard working line is replaced with messages like:
 ⠹ Downloading RAM...
 ```
 
-The spinner is colorized, and the phrase text gets an ANSI shine sweep in Pi's TUI. Markdown previews cannot reliably show that animation, so the snippet above is a plain-text fallback.
+The GIF shows the same working-status customization rendered in a terminal. The snippet above is included for environments that do not animate images. Maintainers can regenerate the GIF with `npm run record:preview`.
 
 ## Features
 
