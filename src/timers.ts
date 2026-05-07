@@ -80,8 +80,9 @@ export function createWorkingStatusController(): {
 			}, intervalMs(config.shineFrameMs));
 
 			phraseTimer = setInterval(() => {
+				const previousMessage = currentMessage;
 				currentMessage = phraseRotator.nextMessage();
-				shineAnimator.reset(currentMessage);
+				shineAnimator.retarget(previousMessage, currentMessage);
 				render(ctx);
 			}, intervalMs(config.phrasesShuffleMs));
 		},

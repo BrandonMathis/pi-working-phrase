@@ -22,8 +22,25 @@ function getBounds(message: string, trailRadius: number): { min: number; max: nu
 	};
 }
 
+function clampProgress(value: number): number {
+	return Math.max(0, Math.min(1, value));
+}
+
+function mapPosition(
+	position: number,
+	fromBounds: { min: number; max: number },
+	toBounds: { min: number; max: number },
+): number {
+	const fromRange = fromBounds.max - fromBounds.min;
+	const toRange = toBounds.max - toBounds.min;
+	const progress = fromRange === 0 ? 0 : clampProgress((position - fromBounds.min) / fromRange);
+
+	return Math.round(toBounds.min + progress * toRange);
+}
+
 export function createShineAnimator(options: ShineAnimatorOptions): {
 	reset(message: string): void;
+	retarget(previousMessage: string, nextMessage: string): void;
 	advance(message: string): void;
 	render(message: string): string;
 } {
@@ -49,6 +66,23 @@ export function createShineAnimator(options: ShineAnimatorOptions): {
 
 	return {
 		reset,
+		retarget(previousMessage: string, nextMessage: string): void {
+			const previousBounds = getBounds(previousMessage, trailRadius);
+			const nextBounds = getBounds(nextMessage, trailRadius);
+
+			switch (phase) {
+				case "pause-after-forward":
+					position = nextBounds.max;
+					break;
+				case "pause-after-reverse":
+					position = nextBounds.min;
+					break;
+				case "forward":
+				case "reverse":
+					position = mapPosition(position, previousBounds, nextBounds);
+					break;
+			}
+		},
 		advance(message: string): void {
 			const { min, max } = getBounds(message, trailRadius);
 

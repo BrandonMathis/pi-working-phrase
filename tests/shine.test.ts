@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { colorize, getShineColor } from "../src/colors";
 import { createShineAnimator } from "../src/shine";
 
 function createAnimator() {
@@ -56,5 +57,27 @@ describe("createShineAnimator", () => {
 		animator.reset("Second");
 
 		expect(animator.render("Second")).toContain("S");
+	});
+
+	it("preserves shine progress when retargeting to a different message length", () => {
+		const baseColor = "#9776c7";
+		const animator = createShineAnimator({
+			baseColor,
+			frameMs: 60,
+			pauseMs: 120,
+			trailRadius: 0,
+			step: 1,
+		});
+		const peakColor = getShineColor(baseColor, 0);
+
+		animator.reset("abcde");
+		animator.advance("abcde");
+		animator.advance("abcde");
+		animator.retarget("abcde", "ABCDEFGHIJ");
+
+		const output = animator.render("ABCDEFGHIJ");
+
+		expect(output).toContain(colorize("F", peakColor));
+		expect(output).not.toContain(colorize("A", peakColor));
 	});
 });
