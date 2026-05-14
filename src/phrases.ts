@@ -148,4 +148,8 @@ export const workingPhrases = [
 	"Unraving the code",
 	"Expanding the universe",
 	"Reheating logs",
+	"Harvesting vespene gas",
+	"Building additional pylons",
+	"Spawning more overlords",
+	"Scouting fog of war",
 ] as const;
