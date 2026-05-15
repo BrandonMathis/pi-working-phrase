@@ -11,7 +11,7 @@ Make `pi-working-phrase` easy to review, install, and list in the Pi package gal
 - Package manifest exists in `package.json` under `pi.extensions` and points to `./src/index.ts`.
 - Package metadata includes repository, bugs, homepage, license, author, and `pi-package` / `pi-extension` keywords.
 - Runtime code has no third-party dependencies.
-- `npm run video:update` records a deterministic, tightly cropped MP4 demo of only the animated spinner/phrase line, extracts a PNG preview from that MP4, and updates `package.json` `pi.video`/`pi.image` metadata.
+- `npm run video:update` records a deterministic, tightly cropped MP4 demo of only the animated spinner/phrase line, extracts a PNG preview for package metadata, generates an animated GIF for the README, and updates `package.json` `pi.video`/`pi.image` metadata.
 - `npm run pack:check` currently produces a small package containing source, docs, README, LICENSE, and package metadata.
 - README already documents local, git, and Pi package install paths.
 
@@ -45,7 +45,7 @@ Use this when the package should appear in the Pi package gallery.
 ### README and docs
 
 - [ ] Install VHS recorder dependencies: `brew install vhs ffmpeg ttyd` on macOS, or follow the VHS Linux docs.
-- [ ] Run `npm run video:update` to generate `docs/assets/pi-working-phrase-demo.mp4`, extract `docs/assets/pi-working-phrase-demo.png`, and set `package.json` `pi.video`/`pi.image`.
+- [ ] Run `npm run video:update` to generate `docs/assets/pi-working-phrase-demo.mp4`, extract `docs/assets/pi-working-phrase-demo.png`, generate `docs/assets/pi-working-phrase-demo.gif`, and set `package.json` `pi.video`/`pi.image`.
 - [ ] Review the generated MP4 before committing it.
 - [ ] Confirm README install commands match the final public repository, tag, and package source.
 - [ ] Update the tested Pi and Node versions after final manual QA.

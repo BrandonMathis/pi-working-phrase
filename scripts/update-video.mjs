@@ -8,6 +8,7 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(SCRIPT_DIR, "..");
 const VIDEO_PATH = path.join(PROJECT_ROOT, "docs/assets/pi-working-phrase-demo.mp4");
 const IMAGE_PATH = path.join(PROJECT_ROOT, "docs/assets/pi-working-phrase-demo.png");
+const GIF_PATH = path.join(PROJECT_ROOT, "docs/assets/pi-working-phrase-demo.gif");
 const TAPE_PATH = path.join(PROJECT_ROOT, ".video/pi-working-phrase-demo.tape");
 const PACKAGE_JSON_PATH = path.join(PROJECT_ROOT, "package.json");
 const DEFAULT_BRANCH = process.env.PI_VIDEO_BRANCH ?? "main";
@@ -69,7 +70,6 @@ Set LineHeight 1.2
 Set Framerate 30
 Set CursorBlink false
 Set TypingSpeed 35ms
-Env PI_WORKING_PHRASE_VIDEO_COMPACT "true"
 Env PI_WORKING_PHRASE_DEMO_MS "${DEMO_DURATION_MS}"
 Env PI_WORKING_PHRASE_DEMO_PHRASE_MS "${DEMO_PHRASE_SHUFFLE_MS}"
 
@@ -158,25 +158,33 @@ function recordVideo() {
 	if (!existsSync(VIDEO_PATH)) throw new Error(`VHS completed but did not create ${relativePath(VIDEO_PATH)}`);
 }
 
-function generatePreviewImage() {
+function runFfmpeg(args, outputPath) {
+	const result = spawnSync("ffmpeg", ["-y", "-loglevel", "error", ...args], {
+		cwd: PROJECT_ROOT,
+		stdio: "inherit",
+	});
+
+	if (result.error) throw result.error;
+	if (result.status !== 0) throw new Error(`ffmpeg exited with status ${result.status ?? "unknown"}`);
+	if (!existsSync(outputPath)) throw new Error(`ffmpeg completed but did not create ${relativePath(outputPath)}`);
+}
+
+function generatePreviewAssets() {
 	if (dryRun) {
 		console.log(
 			`[dry-run] Would extract ${relativePath(IMAGE_PATH)} from ${relativePath(VIDEO_PATH)} at ${PREVIEW_IMAGE_TIMESTAMP}`,
 		);
+		console.log(`[dry-run] Would generate ${relativePath(GIF_PATH)} from ${relativePath(VIDEO_PATH)}`);
 		return;
 	}
 
 	requireCommands(["ffmpeg"]);
 	if (!existsSync(VIDEO_PATH)) {
-		throw new Error(`Cannot create ${relativePath(IMAGE_PATH)} because ${relativePath(VIDEO_PATH)} does not exist.`);
+		throw new Error(`Cannot create previews because ${relativePath(VIDEO_PATH)} does not exist.`);
 	}
 
-	const result = spawnSync(
-		"ffmpeg",
+	runFfmpeg(
 		[
-			"-y",
-			"-loglevel",
-			"error",
 			"-ss",
 			PREVIEW_IMAGE_TIMESTAMP,
 			"-i",
@@ -187,16 +195,21 @@ function generatePreviewImage() {
 			"scale=760:-1",
 			relativePath(IMAGE_PATH),
 		],
-		{
-			cwd: PROJECT_ROOT,
-			stdio: "inherit",
-		},
+		IMAGE_PATH,
 	);
-
-	if (result.error) throw result.error;
-	if (result.status !== 0) throw new Error(`ffmpeg exited with status ${result.status ?? "unknown"}`);
-	if (!existsSync(IMAGE_PATH)) throw new Error(`ffmpeg completed but did not create ${relativePath(IMAGE_PATH)}`);
 	console.log(`Updated ${relativePath(IMAGE_PATH)} from ${relativePath(VIDEO_PATH)}`);
+
+	runFfmpeg(
+		[
+			"-i",
+			relativePath(VIDEO_PATH),
+			"-filter_complex",
+			"[0:v]fps=15,scale=760:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle",
+			relativePath(GIF_PATH),
+		],
+		GIF_PATH,
+	);
+	console.log(`Updated ${relativePath(GIF_PATH)} from ${relativePath(VIDEO_PATH)}`);
 }
 
 function printSummary() {
@@ -205,11 +218,12 @@ function printSummary() {
 	console.log("Preview asset update complete.");
 	console.log(`- Video file: ${relativePath(VIDEO_PATH)}`);
 	console.log(`- Image file: ${relativePath(IMAGE_PATH)}`);
+	console.log(`- GIF file:   ${relativePath(GIF_PATH)}`);
 	console.log(`- Tape file: ${relativePath(TAPE_PATH)}`);
 	console.log(`- pi.video:   ${packageJson.pi?.video ?? "not set"}`);
 	console.log(`- pi.image:   ${packageJson.pi?.image ?? "not set"}`);
 	console.log("");
-	console.log("If this is for the marketplace, commit the MP4, PNG, and package.json after reviewing the assets.");
+	console.log("If this is for the marketplace, commit the MP4, PNG, GIF, and package.json after reviewing the assets.");
 }
 
 try {
@@ -223,7 +237,7 @@ try {
 	}
 
 	recordVideo();
-	generatePreviewImage();
+	generatePreviewAssets();
 	updatePackageJson();
 	printSummary();
 } catch (error) {

@@ -20,7 +20,6 @@ const CLEAR_SCREEN = "\x1b[2J\x1b[H";
 const CLEAR_LINE = "\x1b[2K\r";
 const HIDE_CURSOR = "\x1b[?25l";
 const SHOW_CURSOR = "\x1b[?25h";
-const COMPACT_MODE = process.env.PI_WORKING_PHRASE_VIDEO_COMPACT === "true";
 const DEMO_DURATION_MS = positiveMillisecondsFromEnv("PI_WORKING_PHRASE_DEMO_MS", 9200);
 const DEMO_PHRASE_SHUFFLE_MS = positiveMillisecondsFromEnv("PI_WORKING_PHRASE_DEMO_PHRASE_MS", config.phrasesShuffleMs);
 const RANDOM_SEED = 0x5049;
@@ -95,14 +94,6 @@ async function main(): Promise<void> {
 	write(HIDE_CURSOR);
 	write(CLEAR_SCREEN);
 
-	if (!COMPACT_MODE) {
-		console.log(colorize("pi-working-phrase", config.baseColor));
-		console.log("Shuffled phrases + colored spinner + ANSI shine while Pi responds.");
-		console.log("");
-		console.log("User: Explain this extension in one sentence.");
-		console.log("");
-	}
-
 	try {
 		while (Date.now() - startedAt < DEMO_DURATION_MS) {
 			const elapsedMs = Date.now() - startedAt;
@@ -122,14 +113,7 @@ async function main(): Promise<void> {
 			await sleep(frameMs);
 		}
 
-		if (COMPACT_MODE) {
-			write(CLEAR_LINE);
-		} else {
-			write(`${CLEAR_LINE}${colorize("✓", config.spinnerColor)} Pi defaults restored after the response.\n\n`);
-			console.log("Assistant: It makes Pi's working status feel alive while staying tiny and dependency-free.");
-			console.log("");
-			console.log("Demo complete");
-		}
+		write(CLEAR_LINE);
 	} finally {
 		restoreTerminal();
 	}

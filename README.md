@@ -6,11 +6,9 @@ A tiny Pi extension that replaces Pi's working status with shuffled phrases, a c
 
 When Pi is responding, the standard working line is replaced with an animated spinner and shuffled phrase:
 
-<video src="https://raw.githubusercontent.com/brandonmathis/pi-working-phrase/main/docs/assets/pi-working-phrase-demo.mp4" controls muted loop playsinline title="pi-working-phrase demo"></video>
+[![pi-working-phrase animated preview](docs/assets/pi-working-phrase-demo.gif)](docs/assets/pi-working-phrase-demo.mp4)
 
-[Watch the demo video](docs/assets/pi-working-phrase-demo.mp4) or view the static preview:
-
-[![pi-working-phrase preview](docs/assets/pi-working-phrase-demo.png)](docs/assets/pi-working-phrase-demo.mp4)
+[Watch the MP4 demo video](docs/assets/pi-working-phrase-demo.mp4) or view the [static PNG preview](docs/assets/pi-working-phrase-demo.png).
 
 Plain-text fallback:
 
@@ -115,7 +113,7 @@ Then run:
 npm run video:update
 ```
 
-The script records a tightly cropped `docs/assets/pi-working-phrase-demo.mp4` at 25px terminal font size. It hides the typed command and captures only the animated spinner/phrase line using the extension's phrase rotation, shine, and color helpers. It also extracts `docs/assets/pi-working-phrase-demo.png` from the MP4 and sets `package.json` `pi.video`/`pi.image` to raw GitHub URLs for those assets.
+The script records a tightly cropped `docs/assets/pi-working-phrase-demo.mp4` at 25px terminal font size. It hides the typed command and captures only the animated spinner/phrase line using the extension's phrase rotation, shine, and color helpers. It also extracts `docs/assets/pi-working-phrase-demo.png` for package metadata, generates `docs/assets/pi-working-phrase-demo.gif` for the README preview, and sets `package.json` `pi.video`/`pi.image` to raw GitHub URLs for the MP4/PNG assets.
 
 To make phrases rotate faster or slower in the recorded demo, set `PI_WORKING_PHRASE_DEMO_PHRASE_MS` before recording. Lower values rotate faster:
 
@@ -125,7 +123,7 @@ PI_WORKING_PHRASE_DEMO_PHRASE_MS=1000 npm run video:update
 
 The default marketplace recording uses `1500` ms so several phrases appear in the short video.
 
-To regenerate only the PNG from the current generated MP4, run:
+To regenerate only the PNG/GIF previews from the current generated MP4, run:
 
 ```bash
 npm run video:image
