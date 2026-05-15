@@ -8,18 +8,6 @@ When Pi is responding, the standard working line is replaced with an animated sp
 
 [![pi-working-phrase animated preview](docs/assets/pi-working-phrase-demo.gif)](docs/assets/pi-working-phrase-demo.mp4)
 
-[Watch the MP4 demo video](docs/assets/pi-working-phrase-demo.mp4) or view the [static PNG preview](docs/assets/pi-working-phrase-demo.png).
-
-Plain-text fallback:
-
-```txt
-⠋ Reticulating splines...
-⠙ Consulting sacred texts...
-⠹ Downloading RAM...
-```
-
-The spinner is colorized, and the phrase text gets an ANSI shine sweep in Pi's TUI.
-
 ## Features
 
 - Shuffled working phrases while Pi is responding.
