@@ -4,7 +4,15 @@ A tiny Pi extension that replaces Pi's working status with shuffled phrases, a c
 
 ## Preview
 
-When Pi is responding, the standard working line is replaced with messages like:
+When Pi is responding, the standard working line is replaced with an animated spinner and shuffled phrase:
+
+<video src="https://raw.githubusercontent.com/brandonmathis/pi-working-phrase/main/docs/assets/pi-working-phrase-demo.mp4" controls muted loop playsinline title="pi-working-phrase demo"></video>
+
+[Watch the demo video](docs/assets/pi-working-phrase-demo.mp4) or view the static preview:
+
+[![pi-working-phrase preview](docs/assets/pi-working-phrase-demo.png)](docs/assets/pi-working-phrase-demo.mp4)
+
+Plain-text fallback:
 
 ```txt
 ⠋ Reticulating splines...
@@ -12,7 +20,7 @@ When Pi is responding, the standard working line is replaced with messages like:
 ⠹ Downloading RAM...
 ```
 
-The spinner is colorized, and the phrase text gets an ANSI shine sweep in Pi's TUI. Markdown previews cannot reliably show that animation, so the snippet above is a plain-text fallback.
+The spinner is colorized, and the phrase text gets an ANSI shine sweep in Pi's TUI.
 
 ## Features
 
@@ -74,6 +82,61 @@ For local package testing, use an absolute or relative path:
 
 ```bash
 pi install /path/to/pi-working-phrase
+```
+
+## Marketplace / package gallery readiness
+
+This repository is already set up as a Pi package: `package.json` declares the extension under `pi.extensions`, includes the `pi-package` keyword, and keeps runtime code dependency-free.
+
+Before submitting to the Pi package gallery/marketplace, finish the checklist in [`docs/marketplace-submission.md`](docs/marketplace-submission.md). The short version is:
+
+- run `npm run video:update` to record `docs/assets/pi-working-phrase-demo.mp4`, extract `docs/assets/pi-working-phrase-demo.png`, and update `pi.video`/`pi.image` metadata;
+- run `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`, and `npm run pack:check`;
+- perform fresh-install and `/reload` manual QA in Pi;
+- tag a release and send/publish the final install command.
+
+If you just want to share it for review first, send:
+
+```bash
+pi install git:github.com/brandonmathis/pi-working-phrase@v0.1.0
+```
+
+### Regenerate the marketplace video and image
+
+The video workflow uses [VHS](https://github.com/charmbracelet/vhs) to script and record a headless terminal demo. Install VHS plus its recorder dependencies first:
+
+```bash
+brew install vhs ffmpeg ttyd
+```
+
+Then run:
+
+```bash
+npm run video:update
+```
+
+The script records a tightly cropped `docs/assets/pi-working-phrase-demo.mp4` at 25px terminal font size. It hides the typed command and captures only the animated spinner/phrase line using the extension's phrase rotation, shine, and color helpers. It also extracts `docs/assets/pi-working-phrase-demo.png` from the MP4 and sets `package.json` `pi.video`/`pi.image` to raw GitHub URLs for those assets.
+
+To make phrases rotate faster or slower in the recorded demo, set `PI_WORKING_PHRASE_DEMO_PHRASE_MS` before recording. Lower values rotate faster:
+
+```bash
+PI_WORKING_PHRASE_DEMO_PHRASE_MS=1000 npm run video:update
+```
+
+The default marketplace recording uses `1500` ms so several phrases appear in the short video.
+
+To regenerate only the PNG from the current generated MP4, run:
+
+```bash
+npm run video:image
+```
+
+Override the URLs when needed:
+
+```bash
+PI_VIDEO_URL="https://example.com/pi-working-phrase-demo.mp4" \
+PI_IMAGE_URL="https://example.com/pi-working-phrase-demo.png" \
+npm run video:update
 ```
 
 ## Usage

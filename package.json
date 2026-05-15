@@ -26,7 +26,9 @@
 	"pi": {
 		"extensions": [
 			"./src/index.ts"
-		]
+		],
+		"video": "https://raw.githubusercontent.com/brandonmathis/pi-working-phrase/main/docs/assets/pi-working-phrase-demo.mp4",
+		"image": "https://raw.githubusercontent.com/brandonmathis/pi-working-phrase/main/docs/assets/pi-working-phrase-demo.png"
 	},
 	"files": [
 		"src/",
@@ -34,7 +36,8 @@
 		"LICENSE",
 		"CHANGELOG.md",
 		"CONTRIBUTING.md",
-		"docs/"
+		"docs/",
+		"scripts/"
 	],
 	"scripts": {
 		"typecheck": "tsc --noEmit",
@@ -44,7 +47,10 @@
 		"format:check": "prettier --check .",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"pack:check": "npm pack --dry-run"
+		"pack:check": "npm pack --dry-run",
+		"video:demo": "tsx scripts/demo-working-phrase.ts",
+		"video:image": "node scripts/update-video.mjs --skip-record",
+		"video:update": "node scripts/update-video.mjs"
 	},
 	"peerDependencies": {
 		"@mariozechner/pi-coding-agent": "*"
@@ -57,6 +63,7 @@
 		"eslint-config-prettier": "^10.1.8",
 		"globals": "^17.6.0",
 		"prettier": "^3.5.3",
+		"tsx": "^4.22.0",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.59.2",
 		"vitest": "^4.1.5"
