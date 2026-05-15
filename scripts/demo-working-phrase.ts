@@ -1,12 +1,13 @@
 import process from "node:process";
 import { setTimeout as sleep } from "node:timers/promises";
-import { colorize } from "../src/colors";
+import type { ThemeColor } from "@mariozechner/pi-coding-agent";
+import { colorizeHex } from "../src/colors";
 import { config } from "../src/config";
 import { workingPhrases } from "../src/phrases";
 import { createPhraseRotator } from "../src/phrases-rotator";
 import { createShineAnimator } from "../src/shine";
+import { createCharacterStyler, createSpinnerFrames } from "../src/timers";
 
-const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"] as const;
 const DEMO_PHRASES = new Set([
 	"Hacking",
 	"Adjusting bell curves",
@@ -23,6 +24,16 @@ const SHOW_CURSOR = "\x1b[?25h";
 const DEMO_DURATION_MS = positiveMillisecondsFromEnv("PI_WORKING_PHRASE_DEMO_MS", 9200);
 const DEMO_PHRASE_SHUFFLE_MS = positiveMillisecondsFromEnv("PI_WORKING_PHRASE_DEMO_PHRASE_MS", config.phrasesShuffleMs);
 const RANDOM_SEED = 0x5049;
+const DEMO_THEME_HEX: Partial<Record<ThemeColor, string>> = {
+	accent: config.spinnerColor,
+	muted: config.baseColor,
+	customMessageLabel: "#bca8dc",
+};
+const DEMO_THEME = {
+	fg(color: ThemeColor, text: string): string {
+		return colorizeHex(text, DEMO_THEME_HEX[color] ?? "#ffffff");
+	},
+};
 
 function createSeededRandom(seed: number): () => number {
 	let state = seed >>> 0;
@@ -74,7 +85,6 @@ async function main(): Promise<void> {
 		suffix: config.messageSuffix,
 	});
 	const shineAnimator = createShineAnimator({
-		baseColor: config.baseColor,
 		frameMs: config.shineFrameMs,
 		pauseMs: config.shinePauseMs,
 		trailRadius: config.shineTrailRadius,
@@ -87,6 +97,8 @@ async function main(): Promise<void> {
 	let nextPhraseAt = DEMO_PHRASE_SHUFFLE_MS;
 	const frameMs = intervalMs(config.shineFrameMs);
 	const spinnerFrameMs = intervalMs(config.spinnerFrameMs);
+	const spinnerFrames = createSpinnerFrames(DEMO_THEME);
+	const styleCharacter = createCharacterStyler(DEMO_THEME);
 	const startedAt = Date.now();
 
 	shineAnimator.reset(currentMessage);
@@ -105,9 +117,9 @@ async function main(): Promise<void> {
 				nextPhraseAt += DEMO_PHRASE_SHUFFLE_MS;
 			}
 
-			const spinnerIndex = Math.floor(elapsedMs / spinnerFrameMs) % SPINNER_FRAMES.length;
-			const spinner = colorize(SPINNER_FRAMES[spinnerIndex] ?? SPINNER_FRAMES[0], config.spinnerColor);
-			write(`${CLEAR_LINE}${spinner} ${shineAnimator.render(currentMessage)}`);
+			const spinnerIndex = Math.floor(elapsedMs / spinnerFrameMs) % spinnerFrames.length;
+			const spinner = spinnerFrames[spinnerIndex] ?? spinnerFrames[0] ?? "";
+			write(`${CLEAR_LINE}${spinner} ${shineAnimator.render(currentMessage, styleCharacter)}`);
 
 			shineAnimator.advance(currentMessage);
 			await sleep(frameMs);

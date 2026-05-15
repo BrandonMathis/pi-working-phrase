@@ -66,7 +66,7 @@ export const config = {
 	shineTrailRadius: 3,
 	shineStep: 1,
 	spinnerFrameMs: 80,
-	// ...colors and suffix settings
+	// ...color and suffix settings
 } as const;
 ```
 
@@ -81,35 +81,104 @@ export const config = {
 
 ## Color settings
 
-Colors use hex values:
+`colorMode` controls how the working phrase and spinner are styled.
 
 ```ts
+colorMode: "theme", // "theme" | "custom" | "none"
+```
+
+### Theme mode
+
+Theme mode is the default and recommended setting:
+
+```ts
+colorMode: "theme",
+
+themeColors: {
+	message: "customMessageLabel",
+	shinePeak: "accent",
+	shineTrail: "customMessageLabel",
+	spinner: "accent",
+},
+```
+
+In this mode, `pi-working-phrase` uses Pi's active theme instead of hard-coded custom colors. This means the extension follows dark themes, light themes, custom themes, and Pi's terminal color fallback behavior.
+
+The shine gradient is derived from `themeColors.message`. That keeps the normal phrase text and the gradient base aligned, so the brighter characters read as a shine instead of a separate accent color.
+
+The default tokens are:
+
+| Option                   | Default                | Purpose                                                                             |
+| ------------------------ | ---------------------- | ----------------------------------------------------------------------------------- |
+| `themeColors.message`    | `"customMessageLabel"` | Normal working phrase characters and the base for the shine gradient.               |
+| `themeColors.shinePeak`  | `"accent"`             | Fallback brightest shine character when the message color cannot derive a gradient. |
+| `themeColors.shineTrail` | `"customMessageLabel"` | Fallback shine trail when the message color cannot derive a gradient.               |
+| `themeColors.spinner`    | `"accent"`             | Spinner frames.                                                                     |
+
+Pi theme foreground tokens include `text`, `accent`, `muted`, `dim`, `success`, `error`, `warning`, `customMessageText`, `customMessageLabel`, `toolTitle`, and syntax/markdown tokens. See Pi's theme documentation for the full token list.
+
+Example: use subtler colors for the entire working status:
+
+```ts
+colorMode: "theme",
+
+themeColors: {
+	message: "muted",
+	shinePeak: "accent",
+	shineTrail: "muted",
+	spinner: "muted",
+},
+```
+
+### Custom mode
+
+Use custom mode to keep the extension's original purple/green look or to choose your own hex colors:
+
+```ts
+colorMode: "custom",
+
 baseColor: "#9776c7",
 spinnerColor: "#50fa7b",
 ```
 
-Short hex colors like `#abc` are also accepted by the color helper. Invalid colors fall back safely to white.
+In custom mode:
 
-The shine effect derives brighter highlight colors from `baseColor`. `spinnerColor` is applied directly to every spinner frame.
+- `baseColor` controls the working phrase text and shine gradient.
+- `spinnerColor` controls the spinner.
+- Hex colors such as `#9776c7` and short hex colors such as `#abc` are supported.
+- Invalid colors fall back safely to white.
 
 Starter palettes:
 
 ```ts
+colorMode: "custom",
 baseColor: "#9776c7",
 spinnerColor: "#50fa7b",
 ```
 
 ```ts
+colorMode: "custom",
 baseColor: "#8b5cf6",
 spinnerColor: "#22c55e",
 ```
 
 ```ts
+colorMode: "custom",
 baseColor: "#38bdf8",
 spinnerColor: "#facc15",
 ```
 
-If the phrase is hard to read, choose a brighter `baseColor` or increase contrast in your Pi theme.
+If the phrase is hard to read in custom mode, choose a brighter `baseColor` or switch back to theme mode and adjust your Pi theme.
+
+### No-color mode
+
+Use no-color mode if you want the terminal default foreground color and no ANSI color styling from the extension:
+
+```ts
+colorMode: "none",
+```
+
+In no-color mode, the shine animator still advances internally, but each character is rendered as plain text and the spinner frames are plain glyphs.
 
 ## Ellipsis settings
 

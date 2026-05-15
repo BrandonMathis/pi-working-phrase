@@ -53,7 +53,7 @@ function ansiForeground(hexColor: string): string {
 	return `${ANSI_RGB_PREFIX}${r};${g};${b}m`;
 }
 
-export function colorize(text: string, hexColor: string): string {
+export function colorizeHex(text: string, hexColor: string): string {
 	return `${ansiForeground(hexColor)}${text}${RESET_FG}`;
 }
 

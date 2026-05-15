@@ -28,10 +28,12 @@ Only one extension should own the active working status at a time.
 
 ## Colors do not display correctly
 
-- Check that your terminal supports truecolor ANSI escapes.
-- Check your Pi theme contrast.
-- Try a brighter `baseColor` in `src/config.ts`.
-- Try a higher-contrast `spinnerColor`.
+By default, the extension uses `colorMode: "theme"` and follows your active Pi theme.
+
+- If the default colors are hard to read, adjust your Pi theme or change the `themeColors` tokens in `src/config.ts`.
+- If you want the original purple/green look or hand-picked colors, set `colorMode: "custom"` and adjust `baseColor` / `spinnerColor`.
+- In custom mode, check that your terminal supports truecolor ANSI escapes.
+- If colors are undesirable in your terminal, set `colorMode: "none"`.
 
 Markdown, logs, and non-TUI environments may show raw ANSI codes or no animation.
 

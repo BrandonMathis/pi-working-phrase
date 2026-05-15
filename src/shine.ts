@@ -1,9 +1,8 @@
-import { colorize, getShineColor } from "./colors";
-
 type ShinePhase = "forward" | "pause-after-forward" | "reverse" | "pause-after-reverse";
 
+export type ShineStyle = (character: string, distance: number | undefined) => string;
+
 type ShineAnimatorOptions = {
-	baseColor: string;
 	frameMs: number;
 	pauseMs: number;
 	trailRadius: number;
@@ -42,7 +41,7 @@ export function createShineAnimator(options: ShineAnimatorOptions): {
 	reset(message: string): void;
 	retarget(previousMessage: string, nextMessage: string): void;
 	advance(message: string): void;
-	render(message: string): string;
+	render(message: string, styleCharacter: ShineStyle): string;
 } {
 	const frameMs = Math.max(1, options.frameMs);
 	const pauseFrames = Math.max(1, Math.ceil(Math.max(0, options.pauseMs) / frameMs));
@@ -117,15 +116,14 @@ export function createShineAnimator(options: ShineAnimatorOptions): {
 					break;
 			}
 		},
-		render(message: string): string {
+		render(message: string, styleCharacter: ShineStyle): string {
 			const peak = currentPeak();
 			return getCharacters(message)
 				.map((character, index) => {
 					if (character === " ") return character;
 
-					const distance = peak === undefined ? Number.POSITIVE_INFINITY : Math.abs(index - peak);
-					const color = distance <= trailRadius ? getShineColor(options.baseColor, distance) : options.baseColor;
-					return colorize(character, color);
+					const distance = peak === undefined ? undefined : Math.abs(index - peak);
+					return styleCharacter(character, distance);
 				})
 				.join("");
 		},

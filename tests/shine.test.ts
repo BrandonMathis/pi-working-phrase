@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { colorize, getShineColor } from "../src/colors";
 import { createShineAnimator } from "../src/shine";
 
 function createAnimator() {
 	return createShineAnimator({
-		baseColor: "#9776c7",
 		frameMs: 60,
 		pauseMs: 120,
 		trailRadius: 2,
@@ -12,32 +10,37 @@ function createAnimator() {
 	});
 }
 
+function distanceStyle(character: string, distance: number | undefined): string {
+	return `<${character}:${distance ?? "pause"}>`;
+}
+
 describe("createShineAnimator", () => {
-	it("renders ANSI-colored output", () => {
+	it("renders output with a caller-provided character style", () => {
 		const animator = createAnimator();
 		animator.reset("Hello");
 
-		const output = animator.render("Hello");
+		const output = animator.render("Hello", distanceStyle);
 
-		expect(output).toContain("\x1b[38;2;");
-		expect(output).toContain("H");
-		expect(output).toContain("\x1b[39m");
+		expect(output).toContain("<H:");
+		expect(output).toContain("<e:");
+		expect(output).not.toContain("\x1b[38;2;");
 	});
 
-	it("preserves spaces", () => {
+	it("preserves spaces without styling them", () => {
 		const animator = createAnimator();
 		animator.reset("A B");
 
-		const output = animator.render("A B");
+		const output = animator.render("A B", distanceStyle);
 
-		expect(output).toContain("A\x1b[39m \x1b[38;2;");
+		expect(output).toContain("> <");
+		expect(output).not.toContain("< :");
 	});
 
 	it("handles empty messages", () => {
 		const animator = createAnimator();
 		animator.reset("");
 
-		expect(animator.render("")).toBe("");
+		expect(animator.render("", distanceStyle)).toBe("");
 		expect(() => animator.advance("")).not.toThrow();
 	});
 
@@ -56,28 +59,27 @@ describe("createShineAnimator", () => {
 		animator.advance("First");
 		animator.reset("Second");
 
-		expect(animator.render("Second")).toContain("S");
+		expect(animator.render("Second", distanceStyle)).toContain("<S:");
 	});
 
 	it("preserves shine progress when retargeting to a different message length", () => {
-		const baseColor = "#9776c7";
 		const animator = createShineAnimator({
-			baseColor,
 			frameMs: 60,
 			pauseMs: 120,
 			trailRadius: 0,
 			step: 1,
 		});
-		const peakColor = getShineColor(baseColor, 0);
+		const peakStyle = (character: string, distance: number | undefined): string =>
+			distance === 0 ? `[${character}]` : character;
 
 		animator.reset("abcde");
 		animator.advance("abcde");
 		animator.advance("abcde");
 		animator.retarget("abcde", "ABCDEFGHIJ");
 
-		const output = animator.render("ABCDEFGHIJ");
+		const output = animator.render("ABCDEFGHIJ", peakStyle);
 
-		expect(output).toContain(colorize("F", peakColor));
-		expect(output).not.toContain(colorize("A", peakColor));
+		expect(output).toContain("[F]");
+		expect(output).not.toContain("[A]");
 	});
 });
