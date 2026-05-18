@@ -1,12 +1,11 @@
 import process from "node:process";
 import { setTimeout as sleep } from "node:timers/promises";
-import type { ThemeColor } from "@mariozechner/pi-coding-agent";
+import type { ThemeColor } from "@earendil-works/pi-coding-agent";
 import { colorizeHex } from "../src/colors";
-import { config } from "../src/config";
-import { workingPhrases } from "../src/phrases";
 import { createPhraseRotator } from "../src/phrases-rotator";
 import { createShineAnimator } from "../src/shine";
 import { createCharacterStyler, createSpinnerFrames } from "../src/timers";
+import { loadWorkingPhraseConfig } from "../src/user-config";
 
 const DEMO_PHRASES = new Set([
 	"Hacking",
@@ -21,12 +20,16 @@ const CLEAR_SCREEN = "\x1b[2J\x1b[H";
 const CLEAR_LINE = "\x1b[2K\r";
 const HIDE_CURSOR = "\x1b[?25l";
 const SHOW_CURSOR = "\x1b[?25h";
+const demoConfig = loadWorkingPhraseConfig(process.cwd());
 const DEMO_DURATION_MS = positiveMillisecondsFromEnv("PI_WORKING_PHRASE_DEMO_MS", 9200);
-const DEMO_PHRASE_SHUFFLE_MS = positiveMillisecondsFromEnv("PI_WORKING_PHRASE_DEMO_PHRASE_MS", config.phrasesShuffleMs);
+const DEMO_PHRASE_SHUFFLE_MS = positiveMillisecondsFromEnv(
+	"PI_WORKING_PHRASE_DEMO_PHRASE_MS",
+	demoConfig.phrasesShuffleMs,
+);
 const RANDOM_SEED = 0x5049;
 const DEMO_THEME_HEX: Partial<Record<ThemeColor, string>> = {
-	accent: config.spinnerColor,
-	muted: config.baseColor,
+	accent: demoConfig.spinnerColor,
+	muted: demoConfig.baseColor,
 	customMessageLabel: "#bca8dc",
 };
 const DEMO_THEME = {
@@ -58,8 +61,8 @@ function write(text: string): void {
 }
 
 function getDemoPhrases(): readonly string[] {
-	const curatedPhrases = workingPhrases.filter((phrase) => DEMO_PHRASES.has(phrase));
-	return curatedPhrases.length > 0 ? curatedPhrases : workingPhrases.slice(0, 5);
+	const curatedPhrases = demoConfig.phrases.filter((phrase) => DEMO_PHRASES.has(phrase));
+	return curatedPhrases.length > 0 ? curatedPhrases : demoConfig.phrases.slice(0, 5);
 }
 
 function restoreTerminal(): void {
@@ -81,24 +84,24 @@ async function main(): Promise<void> {
 	Math.random = createSeededRandom(RANDOM_SEED);
 
 	const phraseRotator = createPhraseRotator(getDemoPhrases(), {
-		appendEllipsis: config.appendEllipsis,
-		suffix: config.messageSuffix,
+		appendEllipsis: demoConfig.appendEllipsis,
+		suffix: demoConfig.messageSuffix,
 	});
 	const shineAnimator = createShineAnimator({
-		frameMs: config.shineFrameMs,
-		pauseMs: config.shinePauseMs,
-		trailRadius: config.shineTrailRadius,
-		step: config.shineStep,
+		frameMs: demoConfig.shineFrameMs,
+		pauseMs: demoConfig.shinePauseMs,
+		trailRadius: demoConfig.shineTrailRadius,
+		step: demoConfig.shineStep,
 	});
 
 	Math.random = originalRandom;
 
 	let currentMessage = phraseRotator.nextMessage();
 	let nextPhraseAt = DEMO_PHRASE_SHUFFLE_MS;
-	const frameMs = intervalMs(config.shineFrameMs);
-	const spinnerFrameMs = intervalMs(config.spinnerFrameMs);
-	const spinnerFrames = createSpinnerFrames(DEMO_THEME);
-	const styleCharacter = createCharacterStyler(DEMO_THEME);
+	const frameMs = intervalMs(demoConfig.shineFrameMs);
+	const spinnerFrameMs = intervalMs(demoConfig.spinnerFrameMs);
+	const spinnerFrames = createSpinnerFrames(DEMO_THEME, demoConfig);
+	const styleCharacter = createCharacterStyler(DEMO_THEME, demoConfig);
 	const startedAt = Date.now();
 
 	shineAnimator.reset(currentMessage);

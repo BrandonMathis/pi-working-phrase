@@ -1,6 +1,6 @@
 {
 	"name": "pi-working-phrase",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "A tiny Pi extension that replaces Pi's working status with shuffled phrases, a colored spinner, and an animated shine gradient.",
 	"type": "module",
 	"license": "MIT",
@@ -52,12 +52,9 @@
 		"video:image": "node scripts/update-video.mjs --skip-record",
 		"video:update": "node scripts/update-video.mjs"
 	},
-	"peerDependencies": {
-		"@mariozechner/pi-coding-agent": "*"
-	},
 	"devDependencies": {
+		"@earendil-works/pi-coding-agent": "0.74.0",
 		"@eslint/js": "^10.0.1",
-		"@mariozechner/pi-coding-agent": "^0.73.0",
 		"@types/node": "^25.6.0",
 		"eslint": "^10.3.0",
 		"eslint-config-prettier": "^10.1.8",
@@ -67,5 +64,8 @@
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.59.2",
 		"vitest": "^4.1.5"
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*"
 	}
 }

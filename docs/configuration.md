@@ -1,213 +1,118 @@
 # Configuration
 
-`pi-working-phrase` is configured by editing TypeScript files in the extension directory.
+`pi-working-phrase` is configured with a small sidecar JSON file. You should not need to edit files in `src/` for local customization.
+
+| Path                                   | Scope                                                                                       |
+| -------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `~/.pi/agent/pi-working-phrase.json`   | Global, all projects. Honors `PI_CODING_AGENT_DIR` through Pi's configured agent directory. |
+| `<project>/.pi/pi-working-phrase.json` | Project-local override.                                                                     |
+
+Configuration is merged in this order:
 
 ```txt
-src/config.ts
-src/phrases.ts
+built-in defaults → global sidecar config → project sidecar config
 ```
 
-After changing either file, run `/reload` in Pi.
+Config is read when the next Pi response starts. If you want to force a full extension reload, run `/reload` in Pi or restart Pi.
 
-## Phrase customization
+Only custom colors, phrase rotation speed, and local appended phrases are configurable from sidecar JSON. Unknown keys, invalid value types, and invalid JSON are ignored safely. Built-in working phrases live in `src/phrases.ts`.
 
-Edit `src/phrases.ts` and replace `workingPhrases` with your preferred messages:
+## Minimal example
 
-```ts
-export const workingPhrases = ["Reticulating splines", "Consulting sacred texts", "Shipping bugs"] as const;
+```json
+{
+	"baseColor": "#9776c7",
+	"spinnerColor": "#50fa7b",
+	"customPhrases": []
+}
 ```
-
-Rules:
-
-- Use plain strings.
-- Empty strings and whitespace-only strings are ignored.
-- Phrases are trimmed before display.
-- Trailing `...` and `…` are removed before the configured suffix is applied.
-- Longer phrase lists are fine; the extension keeps one shuffled queue in memory.
-
-### Short phrase set
-
-```ts
-export const workingPhrases = ["Thinking", "Reading", "Planning", "Building"] as const;
-```
-
-### Longer phrase set
-
-```ts
-export const workingPhrases = [
-	"Reticulating splines",
-	"Consulting sacred texts",
-	"Resolving GUID conflict",
-	"Synthesizing wavelets",
-	"Downloading RAM",
-] as const;
-```
-
-### Themed phrase set
-
-```ts
-export const workingPhrases = [
-	"Opening dark portal",
-	"Performing arcane ritual",
-	"Enscribing runes",
-	"Consulting sacred texts",
-] as const;
-```
-
-## Timing settings
-
-Edit `src/config.ts`:
-
-```ts
-export const config = {
-	phrasesShuffleMs: 8000,
-	shineFrameMs: 60,
-	shinePauseMs: 900,
-	shineTrailRadius: 3,
-	shineStep: 1,
-	spinnerFrameMs: 80,
-	// ...color and suffix settings
-} as const;
-```
-
-| Option             | Suggested range | Notes                                                     |
-| ------------------ | --------------: | --------------------------------------------------------- |
-| `phrasesShuffleMs` |  `3000`-`15000` | Lower values change messages more often.                  |
-| `shineFrameMs`     |      `30`-`120` | Lower values animate faster and update the UI more often. |
-| `shinePauseMs`     |    `300`-`2000` | Pause after each shine sweep.                             |
-| `spinnerFrameMs`   |      `60`-`150` | Spinner animation speed.                                  |
-
-`shineTrailRadius` controls how many characters around the shine peak are highlighted. `shineStep` controls how many character positions the shine advances per frame.
 
 ## Color settings
 
-`colorMode` controls how the working phrase and spinner are styled.
+By default, `pi-working-phrase` follows your active Pi theme. To use custom colors, set `baseColor` and/or `spinnerColor` in your sidecar config. The extension infers custom color mode when either custom color is present.
 
-```ts
-colorMode: "theme", // "theme" | "custom" | "none"
+```json
+{
+	"baseColor": "#9776c7",
+	"spinnerColor": "#50fa7b"
+}
 ```
-
-### Theme mode
-
-Theme mode is the default and recommended setting:
-
-```ts
-colorMode: "theme",
-
-themeColors: {
-	message: "customMessageLabel",
-	shinePeak: "accent",
-	shineTrail: "customMessageLabel",
-	spinner: "accent",
-},
-```
-
-In this mode, `pi-working-phrase` uses Pi's active theme instead of hard-coded custom colors. This means the extension follows dark themes, light themes, custom themes, and Pi's terminal color fallback behavior.
-
-The shine gradient is derived from `themeColors.message`. That keeps the normal phrase text and the gradient base aligned, so the brighter characters read as a shine instead of a separate accent color.
-
-The default tokens are:
-
-| Option                   | Default                | Purpose                                                                             |
-| ------------------------ | ---------------------- | ----------------------------------------------------------------------------------- |
-| `themeColors.message`    | `"customMessageLabel"` | Normal working phrase characters and the base for the shine gradient.               |
-| `themeColors.shinePeak`  | `"accent"`             | Fallback brightest shine character when the message color cannot derive a gradient. |
-| `themeColors.shineTrail` | `"customMessageLabel"` | Fallback shine trail when the message color cannot derive a gradient.               |
-| `themeColors.spinner`    | `"accent"`             | Spinner frames.                                                                     |
-
-Pi theme foreground tokens include `text`, `accent`, `muted`, `dim`, `success`, `error`, `warning`, `customMessageText`, `customMessageLabel`, `toolTitle`, and syntax/markdown tokens. See Pi's theme documentation for the full token list.
-
-Example: use subtler colors for the entire working status:
-
-```ts
-colorMode: "theme",
-
-themeColors: {
-	message: "muted",
-	shinePeak: "accent",
-	shineTrail: "muted",
-	spinner: "muted",
-},
-```
-
-### Custom mode
-
-Use custom mode to keep the extension's original purple/green look or to choose your own hex colors:
-
-```ts
-colorMode: "custom",
-
-baseColor: "#9776c7",
-spinnerColor: "#50fa7b",
-```
-
-In custom mode:
 
 - `baseColor` controls the working phrase text and shine gradient.
 - `spinnerColor` controls the spinner.
+- If only one color is set, the other uses the built-in default.
 - Hex colors such as `#9776c7` and short hex colors such as `#abc` are supported.
 - Invalid colors fall back safely to white.
 
+To return to theme colors, remove `baseColor` and `spinnerColor` from the sidecar config.
+
 Starter palettes:
 
-```ts
-colorMode: "custom",
-baseColor: "#9776c7",
-spinnerColor: "#50fa7b",
+```json
+{
+	"baseColor": "#9776c7",
+	"spinnerColor": "#50fa7b"
+}
 ```
 
-```ts
-colorMode: "custom",
-baseColor: "#8b5cf6",
-spinnerColor: "#22c55e",
+```json
+{
+	"baseColor": "#8b5cf6",
+	"spinnerColor": "#22c55e"
+}
 ```
 
-```ts
-colorMode: "custom",
-baseColor: "#38bdf8",
-spinnerColor: "#facc15",
+```json
+{
+	"baseColor": "#38bdf8",
+	"spinnerColor": "#facc15"
+}
 ```
 
-If the phrase is hard to read in custom mode, choose a brighter `baseColor` or switch back to theme mode and adjust your Pi theme.
+## Custom phrases
 
-### No-color mode
+Built-in phrases are bundled in `src/phrases.ts`. Add local-only phrases with `customPhrases`:
 
-Use no-color mode if you want the terminal default foreground color and no ANSI color styling from the extension:
-
-```ts
-colorMode: "none",
+```json
+{
+	"customPhrases": ["Asking the rubber duck", "Re-reading the stack trace"]
+}
 ```
 
-In no-color mode, the shine animator still advances internally, but each character is rendered as plain text and the spinner frames are plain glyphs.
+`customPhrases` appends to the built-in phrase list. It does not replace built-in phrases. Project config runs after global config, so project `customPhrases` append after global `customPhrases`.
 
-## Ellipsis settings
+Phrase display rules:
 
-```ts
-appendEllipsis: true,
-messageSuffix: "...",
+- Use plain strings.
+- Empty strings and whitespace-only strings are ignored during display.
+- Phrases are trimmed before display.
+- Trailing `...` and `…` are removed before the built-in suffix is applied.
+
+## Phrase rotation speed
+
+Use `phrasesShuffleMs` to control how often the working phrase changes:
+
+```json
+{
+	"phrasesShuffleMs": 5000
+}
 ```
 
-Examples:
+| Option             | Suggested range | Notes                                    |
+| ------------------ | --------------: | ---------------------------------------- |
+| `phrasesShuffleMs` |  `3000`-`15000` | Lower values change messages more often. |
 
-```ts
-appendEllipsis: true,
-messageSuffix: "...",
-```
+## Full configuration reference
 
-```ts
-appendEllipsis: true,
-messageSuffix: "…",
-```
-
-```ts
-appendEllipsis: false,
-messageSuffix: "",
-```
-
-When `appendEllipsis` is true, trailing ellipses already present in phrases are removed before `messageSuffix` is appended. This avoids doubled suffixes such as `Working......`.
+| Option             |     Default | Description                                                  |
+| ------------------ | ----------: | ------------------------------------------------------------ |
+| `baseColor`        | `undefined` | Enables custom mode and sets custom-mode phrase/shine color. |
+| `spinnerColor`     | `undefined` | Enables custom mode and sets custom-mode spinner color.      |
+| `customPhrases`    |        `[]` | Appends local-only phrases after the built-in phrase list.   |
+| `phrasesShuffleMs` |      `8000` | Milliseconds between phrase changes.                         |
 
 ## Performance notes
 
-- Very low `shineFrameMs` values can cause frequent UI updates.
+- Very low `phrasesShuffleMs` values can change messages too frequently to read comfortably.
 - Longer phrase lists are fine because only one shuffled queue is held in memory.
 - The extension does no work in print or JSON modes because `ctx.hasUI` is checked before UI updates.

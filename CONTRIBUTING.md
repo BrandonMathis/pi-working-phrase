@@ -28,6 +28,8 @@ Then run `/reload` in Pi.
 - Keep runtime code dependency-free unless a dependency has a clear, release-blocking benefit.
 - Prefer pure helpers for phrase, color, and shine logic so they stay easy to test.
 - Keep `src/index.ts` limited to lifecycle hook registration.
+- Keep `src/config.ts` and `src/phrases.ts` as built-in defaults. User customization should happen through sidecar JSON files, not source edits.
+- Keep sidecar config intentionally small. Supported user-facing keys are `baseColor`, `spinnerColor`, `customPhrases`, and `phrasesShuffleMs`.
 
 ## Testing requirements
 
@@ -71,10 +73,26 @@ Please avoid:
 
 - Slash commands.
 - Runtime settings mutation.
-- Persisted user settings.
 - Settings panels.
 - New runtime dependencies unless clearly justified.
 
 ## Release process
 
-See [`docs/release-checklist.md`](docs/release-checklist.md).
+Before publishing a release:
+
+1. Update `CHANGELOG.md`.
+2. Bump `package.json` and `package-lock.json`.
+3. Run:
+
+```bash
+npm run format:check
+npm run lint
+npm run typecheck
+npm test
+npm run pack:check
+```
+
+4. Commit the release changes.
+5. Tag the release with `vX.Y.Z`.
+6. Push the branch and tag.
+7. Publish with `npm publish`.

@@ -1,4 +1,4 @@
-import type { ThemeColor } from "@mariozechner/pi-coding-agent";
+import type { ThemeColor } from "@earendil-works/pi-coding-agent";
 
 export type ColorMode = "theme" | "custom" | "none";
 
@@ -9,6 +9,21 @@ export type WorkingPhraseThemeColors = {
 	spinner: ThemeColor;
 };
 
+export type WorkingPhraseConfig = {
+	phrasesShuffleMs: number;
+	shineFrameMs: number;
+	shinePauseMs: number;
+	shineTrailRadius: number;
+	shineStep: number;
+	colorMode: ColorMode;
+	themeColors: WorkingPhraseThemeColors;
+	baseColor: string;
+	spinnerColor: string;
+	appendEllipsis: boolean;
+	messageSuffix: string;
+	spinnerFrameMs: number;
+};
+
 const themeColors = {
 	message: "customMessageLabel",
 	shinePeak: "accent",
@@ -16,14 +31,14 @@ const themeColors = {
 	spinner: "accent",
 } as const satisfies WorkingPhraseThemeColors;
 
-export const config = {
+export const defaultConfig = {
 	phrasesShuffleMs: 8000,
 	shineFrameMs: 60,
 	shinePauseMs: 900,
 	shineTrailRadius: 3,
 	shineStep: 1,
 
-	colorMode: "custom" satisfies ColorMode,
+	colorMode: "theme",
 
 	themeColors,
 
@@ -34,4 +49,4 @@ export const config = {
 	messageSuffix: "...",
 
 	spinnerFrameMs: 80,
-} as const;
+} as const satisfies WorkingPhraseConfig;

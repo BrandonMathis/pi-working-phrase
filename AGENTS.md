@@ -17,13 +17,13 @@ Keep the project focused on working-status customization. Avoid turning it into 
 
 - `README.md` - user-facing overview, install, configuration, compatibility, and troubleshooting summary.
 - `CONTRIBUTING.md` - contribution boundaries, local setup, test checklist, release notes.
-- `docs/development.md` - project architecture and manual Pi test checklist.
-- `docs/configuration.md` - supported phrase/color/timing settings.
+- `docs/configuration.md` - supported sidecar color, custom phrase, and phrase rotation settings.
+- `docs/troubleshooting.md` - common install, color, phrase rotation, and TUI troubleshooting.
 - Pi API docs, when changing extension behavior:
-  - `node_modules/@mariozechner/pi-coding-agent/docs/extensions.md`
-  - `node_modules/@mariozechner/pi-coding-agent/docs/tui.md`
-  - `node_modules/@mariozechner/pi-coding-agent/docs/packages.md`
-  - `node_modules/@mariozechner/pi-coding-agent/examples/extensions/working-indicator.ts`
+  - `node_modules/@earendil-works/pi-coding-agent/docs/extensions.md`
+  - `node_modules/@earendil-works/pi-coding-agent/docs/tui.md`
+  - `node_modules/@earendil-works/pi-coding-agent/docs/packages.md`
+  - `node_modules/@earendil-works/pi-coding-agent/examples/extensions/working-indicator.ts`
 
 ## Architecture map
 
@@ -31,8 +31,9 @@ Keep the project focused on working-status customization. Avoid turning it into 
 | ------------------------ | -------------------------------------------------------------------------------- |
 | `src/index.ts`           | Pi extension entrypoint. Register lifecycle hooks only.                          |
 | `src/timers.ts`          | Coordinates Pi UI updates, timers, spinner frames, phrase rotation, and cleanup. |
-| `src/config.ts`          | User-editable timing, color, suffix, and spinner settings.                       |
-| `src/phrases.ts`         | User-editable phrase list.                                                       |
+| `src/config.ts`          | Built-in timing, color, suffix, and spinner defaults.                            |
+| `src/phrases.ts`         | Built-in phrase list.                                                            |
+| `src/user-config.ts`     | Sidecar config loading for custom colors, appended phrases, and rotation speed.  |
 | `src/phrases-rotator.ts` | Pure phrase normalization, shuffling, fallback text, and repeat avoidance.       |
 | `src/shine.ts`           | Pure shine animation state machine and message rendering.                        |
 | `src/colors.ts`          | ANSI truecolor, hex normalization, RGB conversion, and highlight color helpers.  |
@@ -84,22 +85,26 @@ Pi loads the TypeScript source directly; there is no build step for normal local
 
 ### Phrases
 
-- `src/phrases.ts` should export `workingPhrases` as a readonly `as const` array.
+- `src/phrases.ts` should export `defaultWorkingPhrases` as a readonly `as const` array.
 - `createPhraseRotator()` trims phrases, drops empties, removes trailing `...`/`…`, appends the configured suffix, shuffles, and avoids immediate repeats when possible.
 - Keep phrase logic pure and covered by `tests/phrases-rotator.test.ts`.
 
 ### Configuration
 
-- User-tunable defaults live in `src/config.ts`.
-- If adding or renaming config fields, update:
+- Built-in defaults live in `src/config.ts`.
+- Sidecar config is intentionally minimal. Supported user-facing keys are `baseColor`, `spinnerColor`, `customPhrases`, and `phrasesShuffleMs`.
+- Custom color mode is inferred when `baseColor` or `spinnerColor` is present; do not expose `colorMode` in sidecar config.
+- `customPhrases` appends local-only phrases after the built-in list; do not reintroduce full phrase replacement without explicit direction.
+- If adding or renaming sidecar config fields, update:
   - `README.md` configuration sections,
   - `docs/configuration.md`,
+  - `docs/troubleshooting.md` if behavior changes,
   - any affected tests.
-- Keep config simple TypeScript. Do not add persisted settings, settings panels, or runtime mutation without explicit direction.
+- Keep config simple JSON/TypeScript. Do not add persisted settings, settings panels, or runtime mutation without explicit direction.
 
 ### Dependencies and packaging
 
 - Runtime code should remain dependency-free.
-- Pi core imports such as `@mariozechner/pi-coding-agent` belong in `peerDependencies`, not bundled runtime dependencies.
+- Pi core imports such as `@earendil-works/pi-coding-agent` belong in `peerDependencies`, not bundled runtime dependencies.
 - Do not commit generated tarballs, coverage output, `dist/`, or unrelated package manager artifacts.
 - Use `npm run pack:check` before release/package changes.

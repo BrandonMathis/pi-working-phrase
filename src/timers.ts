@@ -1,9 +1,9 @@
-import type { ExtensionContext, ThemeColor } from "@mariozechner/pi-coding-agent";
+import type { ExtensionContext, ThemeColor } from "@earendil-works/pi-coding-agent";
 import { colorizeHex, getShineColor } from "./colors";
-import { config } from "./config";
-import { workingPhrases } from "./phrases";
+import { defaultConfig } from "./config";
 import { createPhraseRotator } from "./phrases-rotator";
 import { createShineAnimator, type ShineStyle } from "./shine";
+import { createDefaultWorkingPhraseConfig, type ResolvedWorkingPhraseConfig } from "./user-config";
 
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"] as const;
 const RESET_FG = "\x1b[39m";
@@ -177,7 +177,7 @@ function createThemeShineColorizer(theme: ThemeStyler, messageColor: ThemeColor)
 	};
 }
 
-export function createSpinnerFrames(theme: ThemeStyler, colorConfig: ColorRenderingConfig = config): string[] {
+export function createSpinnerFrames(theme: ThemeStyler, colorConfig: ColorRenderingConfig = defaultConfig): string[] {
 	switch (colorConfig.colorMode) {
 		case "theme":
 			return SPINNER_FRAMES.map((frame) => theme.fg(colorConfig.themeColors.spinner, frame));
@@ -188,7 +188,10 @@ export function createSpinnerFrames(theme: ThemeStyler, colorConfig: ColorRender
 	}
 }
 
-export function createCharacterStyler(theme: ThemeStyler, colorConfig: ColorRenderingConfig = config): ShineStyle {
+export function createCharacterStyler(
+	theme: ThemeStyler,
+	colorConfig: ColorRenderingConfig = defaultConfig,
+): ShineStyle {
 	switch (colorConfig.colorMode) {
 		case "theme": {
 			const colorizeShine = createThemeShineColorizer(theme, colorConfig.themeColors.message);
@@ -217,26 +220,27 @@ export function createCharacterStyler(theme: ThemeStyler, colorConfig: ColorRend
 	}
 }
 
-function applySpinner(ctx: ExtensionContext): void {
+function applySpinner(ctx: ExtensionContext, runtimeConfig: ResolvedWorkingPhraseConfig): void {
 	ctx.ui.setWorkingIndicator({
-		frames: createSpinnerFrames(ctx.ui.theme),
-		intervalMs: intervalMs(config.spinnerFrameMs),
+		frames: createSpinnerFrames(ctx.ui.theme, runtimeConfig),
+		intervalMs: intervalMs(runtimeConfig.spinnerFrameMs),
 	});
 }
 
 export function createWorkingStatusController(): {
-	start(ctx: ExtensionContext): void;
+	start(ctx: ExtensionContext, runtimeConfig?: ResolvedWorkingPhraseConfig): void;
 	stop(ctx?: ExtensionContext): void;
 } {
-	const phraseRotator = createPhraseRotator(workingPhrases, {
-		appendEllipsis: config.appendEllipsis,
-		suffix: config.messageSuffix,
+	let runtimeConfig = createDefaultWorkingPhraseConfig();
+	let phraseRotator = createPhraseRotator(runtimeConfig.phrases, {
+		appendEllipsis: runtimeConfig.appendEllipsis,
+		suffix: runtimeConfig.messageSuffix,
 	});
-	const shineAnimator = createShineAnimator({
-		frameMs: config.shineFrameMs,
-		pauseMs: config.shinePauseMs,
-		trailRadius: config.shineTrailRadius,
-		step: config.shineStep,
+	let shineAnimator = createShineAnimator({
+		frameMs: runtimeConfig.shineFrameMs,
+		pauseMs: runtimeConfig.shinePauseMs,
+		trailRadius: runtimeConfig.shineTrailRadius,
+		step: runtimeConfig.shineStep,
 	});
 
 	let phraseTimer: ReturnType<typeof setInterval> | undefined;
@@ -254,8 +258,22 @@ export function createWorkingStatusController(): {
 		}
 	}
 
+	function configure(nextConfig: ResolvedWorkingPhraseConfig): void {
+		runtimeConfig = nextConfig;
+		phraseRotator = createPhraseRotator(runtimeConfig.phrases, {
+			appendEllipsis: runtimeConfig.appendEllipsis,
+			suffix: runtimeConfig.messageSuffix,
+		});
+		shineAnimator = createShineAnimator({
+			frameMs: runtimeConfig.shineFrameMs,
+			pauseMs: runtimeConfig.shinePauseMs,
+			trailRadius: runtimeConfig.shineTrailRadius,
+			step: runtimeConfig.shineStep,
+		});
+	}
+
 	function render(ctx: ExtensionContext): void {
-		ctx.ui.setWorkingMessage(shineAnimator.render(currentMessage, createCharacterStyler(ctx.ui.theme)));
+		ctx.ui.setWorkingMessage(shineAnimator.render(currentMessage, createCharacterStyler(ctx.ui.theme, runtimeConfig)));
 	}
 
 	function stop(ctx?: ExtensionContext): void {
@@ -268,13 +286,14 @@ export function createWorkingStatusController(): {
 	}
 
 	return {
-		start(ctx: ExtensionContext): void {
+		start(ctx: ExtensionContext, nextConfig = createDefaultWorkingPhraseConfig()): void {
 			stop(ctx);
+			configure(nextConfig);
 			phraseRotator.reset();
 
 			if (!ctx.hasUI) return;
 
-			applySpinner(ctx);
+			applySpinner(ctx, runtimeConfig);
 			currentMessage = phraseRotator.nextMessage();
 			shineAnimator.reset(currentMessage);
 			render(ctx);
@@ -282,14 +301,14 @@ export function createWorkingStatusController(): {
 			shineTimer = setInterval(() => {
 				shineAnimator.advance(currentMessage);
 				render(ctx);
-			}, intervalMs(config.shineFrameMs));
+			}, intervalMs(runtimeConfig.shineFrameMs));
 
 			phraseTimer = setInterval(() => {
 				const previousMessage = currentMessage;
 				currentMessage = phraseRotator.nextMessage();
 				shineAnimator.retarget(previousMessage, currentMessage);
 				render(ctx);
-			}, intervalMs(config.phrasesShuffleMs));
+			}, intervalMs(runtimeConfig.phrasesShuffleMs));
 		},
 		stop,
 	};

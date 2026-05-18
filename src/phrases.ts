@@ -1,4 +1,4 @@
-export const workingPhrases = [
+export const defaultWorkingPhrases = [
 	"Codemaxxxing",
 	"Vibemaxxxing",
 	"Bugmaxxxing",

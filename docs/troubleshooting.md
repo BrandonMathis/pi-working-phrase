@@ -10,7 +10,7 @@ Confirm the extension is installed at:
 
 Then run `/reload` in Pi.
 
-If reload is not enough, restart Pi. Also confirm that the checkout includes all files imported by `src/index.ts`, such as `src/timers.ts`, `src/config.ts`, `src/phrases.ts`, `src/shine.ts`, `src/colors.ts`, and `src/phrases-rotator.ts`.
+If reload is not enough, restart Pi. Also confirm that the checkout includes all files imported by `src/index.ts`, such as `src/timers.ts`, `src/user-config.ts`, `src/config.ts`, `src/phrases.ts`, `src/shine.ts`, `src/colors.ts`, and `src/phrases-rotator.ts`.
 
 ## Duplicate or conflicting status messages
 
@@ -28,22 +28,20 @@ Only one extension should own the active working status at a time.
 
 ## Colors do not display correctly
 
-By default, the extension uses `colorMode: "theme"` and follows your active Pi theme.
+By default, the extension follows your active Pi theme. Custom color mode is inferred when `baseColor` or `spinnerColor` is set in sidecar config.
 
-- If the default colors are hard to read, adjust your Pi theme or change the `themeColors` tokens in `src/config.ts`.
-- If you want the original purple/green look or hand-picked colors, set `colorMode: "custom"` and adjust `baseColor` / `spinnerColor`.
+- If the default theme colors are hard to read, adjust your Pi theme or set `baseColor` / `spinnerColor`.
 - In custom mode, check that your terminal supports truecolor ANSI escapes.
-- If colors are undesirable in your terminal, set `colorMode: "none"`.
+- To return to theme colors, remove `baseColor` and `spinnerColor` from the sidecar config.
 
 Markdown, logs, and non-TUI environments may show raw ANSI codes or no animation.
 
 ## Phrases are not changing
 
 - Confirm `phrasesShuffleMs` is not set too high.
-- Confirm `src/phrases.ts` has more than one non-empty phrase.
-- Run `/reload` after editing `src/phrases.ts`.
+- Send another prompt so config is re-read, or run `/reload` after editing `~/.pi/agent/pi-working-phrase.json` or `<project>/.pi/pi-working-phrase.json`.
 
-With a single non-empty phrase, the extension stays in single phrase mode and only the shine animation changes.
+Working phrases are bundled in `src/phrases.ts`. Add local-only phrases with `customPhrases` in the sidecar config.
 
 ## No changes in print or JSON mode
 

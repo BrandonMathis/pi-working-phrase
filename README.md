@@ -15,8 +15,8 @@ When Pi is responding, the standard working line is replaced with an animated sp
 - Animated shine effect on the working message.
 - Theme-aware colors by default.
 - Optional custom hex colors for the shine effect and spinner.
-- Optional no-color mode.
-- Configurable shine animation speed.
+- Optional local custom phrases through sidecar config.
+- Minimal sidecar config: custom colors, phrase rotation speed, and appended phrases only.
 - No runtime dependencies.
 - Restores Pi defaults when the agent finishes or the session shuts down.
 
@@ -40,100 +40,64 @@ Start using Pi normally. When Pi begins responding, `pi-working-phrase` sets a c
 
 No slash commands are added by this extension.
 
-After editing config or phrases, run `/reload` in Pi.
+Config is read when the next Pi response starts. If you want to force a full extension reload, run `/reload` in Pi.
 
 ## Configuration quick start
 
-Customize the extension by editing these files:
+Customize the extension with a sidecar JSON file instead of editing files in `src/`.
 
-```txt
-src/config.ts
-src/phrases.ts
-```
+| Path                                   | Scope                                                                            |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| `~/.pi/agent/pi-working-phrase.json`   | Global, all projects. Honors `PI_CODING_AGENT_DIR` through Pi's agent directory. |
+| `<project>/.pi/pi-working-phrase.json` | Project-local override.                                                          |
 
-### Change phrases
+Project config is merged over global config. Unknown or invalid values are ignored safely.
 
-```ts
-export const workingPhrases = ["Reticulating splines", "Consulting sacred texts", "Shipping bugs"] as const;
-```
-
-### Change phrase shuffle speed
-
-```ts
-phrasesShuffleMs: 5000,
-```
-
-### Color behavior
-
-By default, `pi-working-phrase` follows your active Pi theme:
-
-```ts
-colorMode: "theme",
-```
-
-In theme mode, the extension uses Pi theme tokens for the working phrase, shine highlight, shine trail, and spinner:
-
-```ts
-themeColors: {
-	message: "customMessageLabel",
-	shinePeak: "accent",
-	shineTrail: "customMessageLabel",
-	spinner: "accent",
-},
-```
-
-This is the recommended mode because it respects the user's selected Pi theme and terminal color capabilities. The shine gradient is derived from `themeColors.message`, so the normal text color and shine base match.
+Custom colors, phrase rotation speed, and local appended phrases are configurable from sidecar JSON. Built-in working phrases live in `src/phrases.ts`.
 
 ### Use custom colors
 
-To use the extension's built-in purple/green look or your own hex colors, switch to custom mode:
+By default, `pi-working-phrase` follows your active Pi theme. To use custom colors, set `baseColor` and/or `spinnerColor`; custom color mode is inferred automatically:
 
-```ts
-colorMode: "custom",
-
-baseColor: "#9776c7",
-spinnerColor: "#50fa7b",
+```json
+{
+	"baseColor": "#9776c7",
+	"spinnerColor": "#50fa7b"
+}
 ```
-
-In custom mode:
 
 - `baseColor` controls the working phrase text and shine gradient.
 - `spinnerColor` controls the spinner.
 - Hex colors such as `#9776c7` and short hex colors such as `#abc` are supported.
 - Invalid colors fall back safely to white.
 
-### Disable colors
+To return to theme colors, remove `baseColor` and `spinnerColor`.
 
-If you want the terminal default foreground color with no ANSI color styling:
+### Add custom phrases
 
-```ts
-colorMode: "none",
+Append local-only phrases with `customPhrases`:
+
+```json
+{
+	"customPhrases": ["Asking the rubber duck"]
+}
 ```
 
-### Change shine speed
+### Change phrase rotation speed
 
-```ts
-shineFrameMs: 40,
+```json
+{
+	"phrasesShuffleMs": 5000
+}
 ```
 
 See [`docs/configuration.md`](docs/configuration.md) for detailed guidance and examples.
 
 ## Full configuration table
 
-| Option                   |                Default | Description                                                    |
-| ------------------------ | ---------------------: | -------------------------------------------------------------- |
-| `phrasesShuffleMs`       |                 `8000` | Milliseconds between phrase changes.                           |
-| `shineFrameMs`           |                   `60` | Milliseconds between shine animation frames. Lower is faster.  |
-| `shinePauseMs`           |                  `900` | Pause duration after a shine sweep finishes.                   |
-| `shineTrailRadius`       |                    `3` | Number of characters affected around the shine peak.           |
-| `shineStep`              |                    `1` | Number of character positions advanced per frame.              |
-| `colorMode`              |              `"theme"` | Color strategy: `"theme"`, `"custom"`, or `"none"`.            |
-| `themeColors.message`    | `"customMessageLabel"` | Pi theme token for normal phrase text and shine gradient base. |
-| `themeColors.shinePeak`  |             `"accent"` | Fallback token for the brightest shine character.              |
-| `themeColors.shineTrail` | `"customMessageLabel"` | Fallback token for the shine trail.                            |
-| `themeColors.spinner`    |             `"accent"` | Pi theme token for spinner frames.                             |
-| `baseColor`              |            `"#9776c7"` | Custom-mode phrase color and shine base.                       |
-| `spinnerColor`           |            `"#50fa7b"` | Custom-mode spinner color.                                     |
-| `appendEllipsis`         |                 `true` | Whether to append a suffix to phrases.                         |
-| `messageSuffix`          |                `"..."` | Suffix appended when `appendEllipsis` is enabled.              |
-| `spinnerFrameMs`         |                   `80` | Milliseconds between spinner animation frames.                 |
+| Option             |     Default | Description                                                  |
+| ------------------ | ----------: | ------------------------------------------------------------ |
+| `baseColor`        | `undefined` | Enables custom mode and sets custom-mode phrase/shine color. |
+| `spinnerColor`     | `undefined` | Enables custom mode and sets custom-mode spinner color.      |
+| `customPhrases`    |        `[]` | Appends local-only phrases after the built-in phrase list.   |
+| `phrasesShuffleMs` |      `8000` | Milliseconds between phrase changes.                         |

@@ -1,4 +1,4 @@
-import type { ThemeColor } from "@mariozechner/pi-coding-agent";
+import type { ThemeColor } from "@earendil-works/pi-coding-agent";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	createCharacterStyler,
@@ -188,6 +188,30 @@ describe("createWorkingStatusController", () => {
 
 		expect(ctx.ui.setWorkingMessage).toHaveBeenLastCalledWith();
 		expect(ctx.ui.setWorkingIndicator).toHaveBeenLastCalledWith();
+	});
+
+	it("start(ctx) applies a supplied runtime config", () => {
+		const controller = createWorkingStatusController();
+		const ctx = createContext();
+
+		controller.start(ctx as never, {
+			...baseColorConfig,
+			colorMode: "none",
+			phrases: ["Configured phrase"],
+			phrasesShuffleMs: 5000,
+			shineFrameMs: 70,
+			shinePauseMs: 900,
+			shineStep: 1,
+			appendEllipsis: false,
+			messageSuffix: "...",
+			spinnerFrameMs: 120,
+		});
+
+		expect(ctx.ui.setWorkingIndicator).toHaveBeenCalledWith({
+			frames: expect.arrayContaining(["⠋"]),
+			intervalMs: 120,
+		});
+		expect(ctx.ui.setWorkingMessage).toHaveBeenCalledWith("Configured phrase");
 	});
 
 	it("start(ctx) does nothing UI-specific when ctx.hasUI is false", () => {
