@@ -145,7 +145,7 @@ export const defaultWorkingPhrases = [
 	"Deferring to higher powers",
 	"Praying",
 	"Sending thoughts and prayers",
-	"Unraving the code",
+	"Unraveling the code",
 	"Expanding the universe",
 	"Reheating logs",
 	"Harvesting vespene gas",
