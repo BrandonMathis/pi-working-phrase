@@ -152,4 +152,5 @@ export const defaultWorkingPhrases = [
 	"Building additional pylons",
 	"Spawning more overlords",
 	"Scouting fog of war",
+	"Calling 867-5309",
 ] as const;
