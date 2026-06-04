@@ -140,7 +140,7 @@ export const defaultWorkingPhrases = [
 	"Engaging",
 	"Electrifying the crystals",
 	"Summoning dark forces",
-	"Powers the banks",
+	"Powering the banks",
 	"Sorting the bits",
 	"Deferring to higher powers",
 	"Praying",
