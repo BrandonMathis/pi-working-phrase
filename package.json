@@ -53,7 +53,7 @@
 		"video:update": "node scripts/update-video.mjs"
 	},
 	"devDependencies": {
-		"@earendil-works/pi-coding-agent": "0.74.0",
+		"@earendil-works/pi-coding-agent": "0.75.3",
 		"@eslint/js": "^10.0.1",
 		"@types/node": "^25.6.0",
 		"eslint": "^10.3.0",
