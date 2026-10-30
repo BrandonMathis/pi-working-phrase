@@ -2,6 +2,11 @@
 
 All notable changes to `pi-working-phrase` will be documented in this file.
 
+## 0.2.1 - 2026-10-30
+
+- Adds more built-in working phrases, including mineral harvesting, pylons, overlords, and a familiar phone number.
+- Corrects wording and capitalization in existing built-in phrases.
+
 ## 0.2.0 - 2026-05-18
 
 - Adds sidecar config loading from `~/.pi/agent/pi-working-phrase.json` and `<project>/.pi/pi-working-phrase.json`.

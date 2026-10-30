@@ -1,6 +1,6 @@
 {
 	"name": "pi-working-phrase",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "A tiny Pi extension that replaces Pi's working status with shuffled phrases, a colored spinner, and an animated shine gradient.",
 	"type": "module",
 	"license": "MIT",
