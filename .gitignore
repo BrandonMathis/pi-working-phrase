@@ -2,6 +2,7 @@ node_modules/
 coverage/
 dist/
 .video/
+/.pi/
 *.log
 *.tgz
 .DS_Store

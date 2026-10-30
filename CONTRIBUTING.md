@@ -78,18 +78,18 @@ Please avoid:
 
 ## Release process
 
-Use the repository's [release skill](.pi/skills/release-pi-extension/SKILL.md)
-for preflight, artifact validation, publication, verification, and recovery:
+Maintainers with a local `release-pi-extension` skill can use it for preflight,
+artifact validation, publication, verification, and recovery:
 
 ```text
 /skill:release-pi-extension
 ```
 
 Run `/reload` first if the skill was added during your current Pi session.
-The skill is maintainer tooling and is not distributed as an extension resource.
-See its [research notes](.pi/skills/release-pi-extension/references/release-practices.md)
-for official Pi and npm guidance. Publishing requires working maintainer
-credentials; a GitHub release does not imply that npm publication succeeded.
+Local `.pi/` resources are ignored by git and are not included in this repository
+or the npm package. Without the local skill, follow the checklist below.
+Publishing requires working maintainer credentials; a GitHub release does not
+imply that npm publication succeeded.
 
 Summary checklist:
 
